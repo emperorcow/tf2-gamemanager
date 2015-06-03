@@ -1,0 +1,74 @@
+<html>
+	<head>
+		<title>Builders League United</title>
+		<link rel="stylesheet" href="/css/bootstrap.min.css">
+		<link rel="stylesheet" href="/css/bootstrap-theme.css">
+		<link rel="stylesheet" href="/css/base.css">
+		<link rel="stylesheet" href="/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/css/angular-growl.min.css">
+	</head>
+	<body ng-app="team" ng-controller="TeamController">
+		<div class="container">
+			<div class="row text-center">
+				<img src="/img/team-blue.png"/>
+			</div>
+			<hr class="tall">
+			<div class="row">
+				<div class="col-md-6">
+					<h1><span class="txt-blue">Score:</span> {{team.info.score}}</h1>
+				</div>
+				<div class="col-md-6">
+					<h1><span class="txt-blue">Credits:</span> <i class="fa fa-money"></i> {{team.info.credits}}</h1>
+				</div>
+			</div>
+			<hr class="tall">
+			<div class="row text-center score-header bg-blue margin-top">
+				<h2>Actions for Purchase:</h2>
+			</div>
+			<div class="actions">
+				<div class="row" ng-repeat="act in actions">
+					<div class="col-sm-3">
+						<h5><i class="fa fa-{{act.icon}}"></i> {{act.name}}</h5>
+					</div>
+					<div class="col-sm-2 cost">
+						<i class="fa fa-money"></i> {{act.cost}}
+					</div>
+					<div class="col-sm-5 description">
+						{{act.description}}
+					</div>
+					<div class="col-sm-2">
+						<a class="btn btn-success pull-right" href="#" ng-click="purchaseClick(act)"><i class="fa fa-shopping-cart"></i> Purchase</a>
+					</div>
+				</div>
+			</div>
+			<div class="row text-center score-header bg-blue margin-top">
+				<h2>Challenges and Puzzles:</h2>
+			</div>
+			<div class="row">
+				<div class="col-md-12 challenges">
+					<div class="row" ng-repeat="chal in challenges">
+						<div class="col-sm-3 text-left">
+							<h3>{{chal.name}}</h3>
+						</div>
+						<div class="col-sm-2">
+							<span class="status text-success" ng-if="team.info.challenges[chal.id]"><i class="fa fa-check"></i> Done</span>
+							<span class="status" ng-if="!team.info.challenges[chal.id]"><i class="fa fa-times"></i> Incomplete</span>
+						</div>
+						<div class="col-sm-1">
+							<h3><i class="fa fa-money"></i> {{chal.value}}</h3>
+						</div>
+						<div class="col-sm-6 text-left">
+							{{chal.description}}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="/js/jquery-2.1.3.min.js"></script>
+		<script src="/js/bootstrap.min.js"></script>
+		<script src="/js/angular.min.js"></script>
+		<script src="/js/angular-resource.min.js"></script>
+		<script src="/js/angular-growl.min.js"></script>
+		<script src="blue.js"></script>
+	</body>
+</html>

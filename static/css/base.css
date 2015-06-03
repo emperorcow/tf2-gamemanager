@@ -1,0 +1,121 @@
+h1 {
+	margin-bottom: 20px;
+	text-align: center;
+}
+
+.txt-red { color: #B8383B;}
+.txt-blue { color: #5885A2;}
+.bg-red { background-color: #B8383B;}
+.bg-blue { background-color: #5885A2;}
+
+.page-header h1 {
+	font-size: 72px;	
+}
+.page-header {
+	border: none;
+}
+
+.container {
+	padding: 20px;
+}
+
+.pad-column {
+	padding: 15px;
+}
+
+.margin-top {
+	margin-top: 30px;
+}
+
+.action {
+	border: 1px solid #fff;
+	padding: 10px;
+}
+
+.actions > div, .challenges > div {
+	border-left: 1px solid #fff;
+	border-right: 1px solid #fff;
+	border-bottom: 1px solid #fff;
+	padding: 10px;
+}
+
+.challenges > div:first-child,
+.actions > div:first-child {
+	border-top: 1px solid #fff;
+}
+
+.challenges > div:last-child,
+.actions > div:last-child {
+	border-bottom-right-radius: 10px;
+	border-bottom-left-radius: 10px;
+}
+
+.actions h5 {
+	font-size: 26px;
+	font-weight: normal;
+	margin: 0 0 3px;
+}
+
+.actions .cost {
+	font-size: 30px;
+}
+
+.actions a {
+	margin-top: 4px;
+}
+
+.actions .status, .challenges .status {
+	font-size: 16px;
+	line-height: 35px;
+}
+
+.actions .description {
+	font-size: 16px;
+}
+
+pre {
+	min-height: 100px;
+}
+
+.challenges h3 {
+	font-weight: bold;
+	margin: 0;
+}
+
+.score-header h2 {
+	margin: 15px;
+}
+
+.score-header {
+	border: 1px solid #F3F3BD;
+	border-top-right-radius: 10px;
+	border-top-left-radius: 10px;
+	position: relative;
+	height: 70px;
+}
+.score-header .team {
+	font-family: tf2regular;
+	font-size: 70px;
+	margin: 0;
+	position: absolute;
+	left: 5px;
+	bottom: -5px;
+}
+.score-header .credits {
+	font-size: 24px;
+	margin-top: 4px;
+	position: absolute;
+	bottom: 0;
+	right: 320;
+}
+.score-header .score {
+	font-family: tf2regular;
+	font-size: 72px;
+	position: absolute;
+	top: -55px;
+	right: -20px;
+	text-shadow: 2px 2px #000;
+}
+
+.red .score-header { background-color: #B8383B;}
+.blue .score-header { background-color: #5885A2;}
