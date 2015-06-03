@@ -98,7 +98,7 @@ func apiTeamsGET(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(HTTP_CODE_OK)
 	resp.Encode(tmp)
-	log.WithField("name", name).Info("Provided team info to API")
+	log.WithField("name", name).Debug("Provided team info to API")
 }
 func apiTeamsPUT(w http.ResponseWriter, r *http.Request) {
 	var recData apiTeams
