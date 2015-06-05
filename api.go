@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
 )
@@ -37,6 +38,47 @@ const (
 	HTTP_CODE_ERROR_T        = "Internal Server Error"
 )
 
+var subnetAdmin *net.IPNet
+var subnetTeam1 *net.IPNet
+var subnetTeam2 *net.IPNet
+
+func init() {
+	_, subnetAdmin, _ = net.ParseCIDR("192.168.0.0/24")
+	_, subnetTeam1, _ = net.ParseCIDR("192.168.1.0/24")
+	_, subnetTeam2, _ = net.ParseCIDR("192.168.2.0/24")
+}
+
+func SubnetMatcher(addr string, n *net.IPNet) bool {
+	ip := net.ParseIP(addr)
+	iplog := log.WithField("ip", addr)
+
+	if ip == nil {
+		iplog.Warn("Unable to parse remote requesting ip")
+		return false
+	}
+	if ip.To4() == nil {
+		iplog.Warn("Address is not an IPv4 address")
+		return false
+	}
+
+	if n.Contains(ip) {
+		return true
+	} else {
+		iplog.Warn("IP is not within allowed range")
+		return false
+	}
+}
+
+func SubnetAdmin(r *http.Request, rm *mux.RouteMatch) bool {
+	return SubnetMatcher(r.RemoteAddr, subnetAdmin)
+}
+func SubnetTeam1(r *http.Request, rm *mux.RouteMatch) bool {
+	return SubnetMatcher(r.RemoteAddr, subnetTeam1)
+}
+func SubnetTeam2(r *http.Request, rm *mux.RouteMatch) bool {
+	return SubnetMatcher(r.RemoteAddr, subnetTeam2)
+}
+
 func runAPI() {
 	r := mux.NewRouter()
 
@@ -53,7 +95,9 @@ func runAPI() {
 
 	r.HandleFunc("/api/rcon", apiRconPost).Methods("POST")
 
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
+	r.PathPrefix("/").MatcherFunc(SubnetAdmin).Handler(http.FileServer(http.Dir("./static/admin/")))
+	r.PathPrefix("/").MatcherFunc(SubnetTeam1).Handler(http.FileServer(http.Dir("./static/team1/")))
+	r.PathPrefix("/").MatcherFunc(SubnetTeam2).Handler(http.FileServer(http.Dir("./static/team2/")))
 	http.ListenAndServe(":80", r)
 }
 
@@ -216,10 +260,10 @@ func apiChallengesSet(w http.ResponseWriter, r *http.Request) {
 	T.SetChallenge(recData.Team, recData.ID, recData.Status)
 	if recData.Status {
 		T.AddCredit(recData.Team, chal.Value)
-		T.AddScore(recData.Team, chal.Value*10)
+		T.AddScore(recData.Team, "Puzzlers", chal.Value*10)
 	} else {
 		T.AddCredit(recData.Team, chal.Value*-1)
-		T.AddScore(recData.Team, chal.Value*-10)
+		T.AddScore(recData.Team, "Puzzlers", chal.Value*-10)
 	}
 
 	w.WriteHeader(HTTP_CODE_OK)

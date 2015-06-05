@@ -93,7 +93,7 @@ func (t *Teams) SetPassword(name string, pass string) {
 	t.Unlock()
 }
 
-func (t *Teams) AddScore(team string, amt int) {
+func (t *Teams) AddScore(team string, user string, amt int) {
 	log.WithFields(log.Fields{
 		"team": team,
 		"amt":  amt,
@@ -101,6 +101,7 @@ func (t *Teams) AddScore(team string, amt int) {
 	t.Lock()
 	tmp := t.data[team]
 	tmp.Score += amt
+	tmp.Users.AddScore(user, amt)
 	t.data[team] = tmp
 	t.Unlock()
 }

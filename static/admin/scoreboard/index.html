@@ -1,0 +1,104 @@
+<html>
+	<head>
+		<title>Scoreboard</title>
+		<link rel="stylesheet" href="/css/bootstrap.min.css">
+		<link rel="stylesheet" href="/css/bootstrap-theme.css">
+		<link rel="stylesheet" href="/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/css/angular-growl.min.css">
+		<link rel="stylesheet" href="/css/base.css">
+		<link rel="stylesheet" href="scoreboard.css">
+	</head>
+	<body ng-app="admin" ng-controller="AdminController">
+		<div growl></div>
+		<div class="container">
+			<div class="row">
+				<div class="page-header">
+					<h1>CroweFortress</h1>
+				</div>
+				<hr class="tall">
+				<div class="col-md-6 text-center red">
+					<div class="pad-column">
+						<div class="row score-header bg-red">
+							<div class="team">
+								Red
+							</div>
+							<div class="credits">
+								<i class="fa fa-money"></i> {{red.info.credits}}
+							</div>
+							<div class="score">
+								{{red.info.score}}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 user-scores">
+								<div class="row header">
+									<div class="col-md-6 text-left">Name</div>
+									<div class="col-md-3">Class</div>
+									<div class="col-md-3">Score</div>
+								</div>
+								<div class="row" ng-repeat="(player, info) in red.info.users.users">
+									<div class="col-md-6 name">{{player}}</div>
+									<div class="col-md-3 class"><img src="/img/class-{{info.role}}-red.png"/></div>
+									<div class="col-md-3 score">{{info.score}}</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 challenges-box">
+								<hr>
+								<span class="fa-stack fa-2x" ng-class="{'text-success': red.info.challenges[chal.id] }" ng-repeat="chal in challenges">
+									<i class="fa fa-circle-thin fa-stack-2x"></i>
+									<strong class="fa-stack-1x fa-stack-text">{{$index + 1}}</strong>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 text-center blue">
+					<div class="pad-column">
+						<div class="row score-header bg-blue">
+							<div class="team">
+								Blu
+							</div>
+							<div class="credits">
+								<i class="fa fa-money"></i> {{blue.info.credits}}
+							</div>
+							<div class="score">
+								{{blue.info.score}}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 user-scores">
+								<div class="row header">
+									<div class="col-md-6 text-left">Name</div>
+									<div class="col-md-3">Class</div>
+									<div class="col-md-3">Score</div>
+								</div>
+								<div class="row" ng-repeat="(player, info) in blue.info.users.users">
+									<div class="col-md-6 name">{{player}}</div>
+									<div class="col-md-3 class"><img src="/img/class-{{info.role}}-blue.png"/></div>
+									<div class="col-md-3 score">{{info.score}}</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 challenges-box">
+								<hr>
+								<span class="fa-stack fa-2x" ng-class="{'text-success': blue.info.challenges[chal.id] }" ng-repeat="chal in challenges">
+									<i class="fa fa-circle-thin fa-stack-2x"></i>
+									<strong class="fa-stack-1x fa-stack-text">{{$index + 1}}</strong>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="/js/jquery-2.1.3.min.js"></script>
+		<script src="/js/bootstrap.min.js"></script>
+		<script src="/js/angular.min.js"></script>
+		<script src="/js/angular-resource.min.js"></script>
+		<script src="/js/angular-growl.min.js"></script>
+		<script src="scoreboard.js"></script>
+	</body>
+</html>

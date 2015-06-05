@@ -63,9 +63,9 @@ func init() {
 	AppendGameRegex("Capture flag", `triggered "flagevent" \(event "captured"\)`, 5, 200)
 }
 
-func TeamEventAction(teamname string, score int, credit int) {
+func TeamEventAction(teamname string, username string, score int, credit int) {
 	T.AddCredit(teamname, credit)
-	T.AddScore(teamname, score)
+	T.AddScore(teamname, username, score)
 }
 
 func RunGameChannel() {
@@ -110,7 +110,7 @@ func RunGameChannel() {
 			m = reg.Comp.FindStringSubmatch(l.Message)
 			if m != nil {
 				log.WithField("name", reg.Name).Info("Matched log event.")
-				TeamEventAction(l.Team, reg.ScoreValue, reg.CreditValue)
+				TeamEventAction(l.Team, l.Username, reg.ScoreValue, reg.CreditValue)
 				continue
 			}
 		}

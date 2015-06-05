@@ -47,6 +47,10 @@ admin.controller('AdminController', ['$interval', '$scope', 'RconService', 'Team
 			})
 	}
 
+	$scope.$watch("commonCommands", function(newVal, oldVal) {
+		$scope.rconcommandbox = newVal;
+	});
+
 	ChallengeService.query()
 		.success(function(data) {
 			$scope.challenges = data

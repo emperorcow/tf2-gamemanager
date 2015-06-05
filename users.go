@@ -9,6 +9,7 @@ type User struct {
 	Wanid string `json:"wanid"`
 	Uid   int64  `json:"uid"`
 	Role  string `json:"role"`
+	Score int    `json:"score"`
 }
 
 type Users struct {
@@ -65,6 +66,18 @@ func (u *Users) Delete(username string) {
 	log.WithField("name", username).Debug("Delete user")
 	u.Lock()
 	delete(u.Data, username)
+	u.Unlock()
+}
+
+func (u *Users) AddScore(username string, score int) {
+	log.WithFields(log.Fields{
+		"name":  username,
+		"score": score,
+	}).Debug("Adding to user score")
+	u.Lock()
+	tmp := u.Data[username]
+	tmp.Score += score
+	u.Data[username] = tmp
 	u.Unlock()
 }
 

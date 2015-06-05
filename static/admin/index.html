@@ -21,7 +21,15 @@
 						<form class="form-inline">
 							<label for="rconCommand">Command</label>
 							<input type="text" ng-model="rconcommandbox" class="form-control" size=80 id="rconCommand" placeholder="Enter command">
+							<select id="commonCommands" class="form-control" ng-model="commonCommands">
+								<option value="tf_bot_quota #">Add Bots (to #)</option>
+								<option value="tf_bot_quota_mode fill">Bot mode fill to quota</option>
+								<option value="tf_bot_quota_mode normal">Bot mode normal</option>
+								<option value="status">Status</option>
+							</select>
 							<button type="submit" ng-click="runCommand()" class="btn btn-default">Run</button>
+						</form>
+						<form>
 						</form>
 					</div>
 				</div>
