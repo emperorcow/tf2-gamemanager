@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"strings"
 )
 
 const (
@@ -69,13 +68,13 @@ func SubnetMatcher(addr string, n *net.IPNet) bool {
 	}
 }
 
-func SubnetAdmin(r *http.Request, rm *mux.RouteMatch) bool {
+func SubnetMatchAdmin(r *http.Request, rm *mux.RouteMatch) bool {
 	return SubnetMatcher(r.RemoteAddr, subnetAdmin)
 }
-func SubnetTeam1(r *http.Request, rm *mux.RouteMatch) bool {
+func SubnetMatchTeam1(r *http.Request, rm *mux.RouteMatch) bool {
 	return SubnetMatcher(r.RemoteAddr, subnetTeam1)
 }
-func SubnetTeam2(r *http.Request, rm *mux.RouteMatch) bool {
+func SubnetMatchTeam2(r *http.Request, rm *mux.RouteMatch) bool {
 	return SubnetMatcher(r.RemoteAddr, subnetTeam2)
 }
 
@@ -88,16 +87,18 @@ func runAPI() {
 	r.HandleFunc("/api/teams/{team}", apiTeamsDELETE).Methods("DELETE")
 
 	r.HandleFunc("/api/actions", apiActionsGet).Methods("GET")
-	r.HandleFunc("/api/actions/{name}/{target}", apiActionsSet).Methods("GET")
+	r.HandleFunc("/api/actions/{name}", apiActionsSet).Methods("GET")
 
 	r.HandleFunc("/api/challenges", apiChallengesGet).Methods("GET")
 	r.HandleFunc("/api/challenges", apiChallengesSet).Methods("POST")
 
 	r.HandleFunc("/api/rcon", apiRconPost).Methods("POST")
 
-	r.PathPrefix("/").MatcherFunc(SubnetAdmin).Handler(http.FileServer(http.Dir("./static/admin/")))
-	r.PathPrefix("/").MatcherFunc(SubnetTeam1).Handler(http.FileServer(http.Dir("./static/team1/")))
-	r.PathPrefix("/").MatcherFunc(SubnetTeam2).Handler(http.FileServer(http.Dir("./static/team2/")))
+	r.PathPrefix("/").MatcherFunc(SubnetMatchAdmin).Handler(http.FileServer(http.Dir("./static/admin/")))
+	r.PathPrefix("/").MatcherFunc(SubnetMatchTeam1).Handler(http.FileServer(http.Dir("./static/team1/")))
+	//	r.PathPrefix("/").MatcherFunc(SubnetMatchTeam2).Handler(http.FileServer(http.Dir("./static/team2/")))
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/team2/")))
+
 	http.ListenAndServe(":80", r)
 }
 
@@ -192,10 +193,8 @@ func apiActionsGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiActionsSet(w http.ResponseWriter, r *http.Request) {
-	team := strings.ToLower(mux.Vars(r)["target"])
 	name := mux.Vars(r)["name"]
 	l := log.WithFields(log.Fields{
-		"team":   team,
 		"action": name,
 	})
 
@@ -207,13 +206,54 @@ func apiActionsSet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var target string
+	if !act.TargetRand {
+		if SubnetMatcher(r.RemoteAddr, subnetTeam1) {
+			if act.TargetSelf {
+				target = "@red"
+			} else {
+				target = "@blue"
+			}
+		} else if SubnetMatcher(r.RemoteAddr, subnetTeam2) {
+			if act.TargetSelf {
+				target = "@blue"
+			} else {
+				target = "@red"
+			}
+		} else {
+			w.WriteHeader(HTTP_CODE_BADREQ)
+			fmt.Fprintf(w, "Request did not come from a proper subnet")
+			l.Error("Request did not come from a team subnet.")
+			return
+		}
+	} else {
+		if SubnetMatcher(r.RemoteAddr, subnetTeam1) {
+			if act.TargetSelf {
+				target, _ = T.GetRandomUser("Red")
+			} else {
+				target, _ = T.GetRandomUser("Blue")
+			}
+		} else if SubnetMatcher(r.RemoteAddr, subnetTeam2) {
+			if act.TargetSelf {
+				target, _ = T.GetRandomUser("Blue")
+			} else {
+				target, _ = T.GetRandomUser("Red")
+			}
+		} else {
+			w.WriteHeader(HTTP_CODE_BADREQ)
+			fmt.Fprintf(w, "Request did not come from a proper subnet")
+			l.Error("Request did not come from a team subnet.")
+			return
+		}
+	}
+
 	respChan := make(chan string, 1)
-	cmd := fmt.Sprintf(act.Cmd, team)
+	cmd := fmt.Sprintf(act.Cmd, target)
 	RconChan <- RconData{cmd, respChan}
 
 	out := <-respChan
 
-	l.WithField("output", out).Info("Ran action for team.")
+	l.WithField("output", out).Info("Ran action for team against target.")
 	w.WriteHeader(HTTP_CODE_OK)
 	fmt.Fprintf(w, out)
 }

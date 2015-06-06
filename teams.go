@@ -140,6 +140,14 @@ func (t *Teams) GetUser(teamname string, username string) (User, bool) {
 	return u, ok
 }
 
+func (t *Teams) GetRandomUser(teamname string) (string, bool) {
+	t.RLock()
+	tmp := t.data[teamname]
+	u, ok := tmp.Users.GetRandom()
+	t.RUnlock()
+	return u, ok
+}
+
 func (t *Teams) DelUser(teamname string, username string) {
 	t.Lock()
 	tmp := t.data[teamname]

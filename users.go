@@ -2,6 +2,7 @@ package main
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"math/rand"
 	"sync"
 )
 
@@ -36,6 +37,23 @@ func (u *Users) Get(username string) (User, bool) {
 	usr, ok := u.Data[username]
 	u.RUnlock()
 	return usr, ok
+}
+
+func (u *Users) GetRandom() (string, bool) {
+	log.Debug("Get random user")
+	u.RLock()
+	users := make([]string, 0, len(u.Data))
+	if len(u.Data) == 0 {
+		return "", false
+	}
+
+	for k := range u.Data {
+		users = append(users, k)
+	}
+	randUsername := users[rand.Intn(len(users))]
+	u.RUnlock()
+
+	return randUsername, true
 }
 
 func (u *Users) GetAll() map[string]User {
