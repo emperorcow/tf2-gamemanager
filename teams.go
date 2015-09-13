@@ -24,6 +24,17 @@ func NewTeams() Teams {
 	}
 }
 
+func NewTeam() Team {
+	tmp := Team{
+		Challenges: make(map[string]bool),
+		Users:      NewUsers(),
+	}
+	tmp.Users.Add("Puzzlers", User{})
+	tmp.Users.SetRole("Puzzlers", "puzzler")
+
+	return tmp
+}
+
 func (t *Teams) Set(name string, info Team) {
 	log.WithField("name", name).Debug("Set team")
 	t.Lock()
@@ -77,7 +88,12 @@ func (t *Teams) Delete(name string) {
 
 func (t *Teams) SetChallenge(teamname string, challengeid string, status bool) {
 	t.Lock()
-	t.data[teamname].Challenges[challengeid] = status
+	_, ok := t.data[teamname]
+	if !ok {
+		log.WithField("team", teamname).Error("Unable to find team")
+	} else {
+		t.data[teamname].Challenges[challengeid] = status
+	}
 	t.Unlock()
 }
 

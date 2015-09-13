@@ -40,15 +40,16 @@ func (u *Users) Get(username string) (User, bool) {
 }
 
 func (u *Users) GetRandom() (string, bool) {
-	log.Debug("Get random user")
 	u.RLock()
 	users := make([]string, 0, len(u.Data))
 	if len(u.Data) == 0 {
 		return "", false
 	}
 
-	for k := range u.Data {
-		users = append(users, k)
+	for u, i := range u.Data {
+		if i.Role != "puzzler" && i.Role != "" {
+			users = append(users, u)
+		}
 	}
 	randUsername := users[rand.Intn(len(users))]
 	u.RUnlock()

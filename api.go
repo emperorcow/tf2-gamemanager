@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -48,8 +49,11 @@ func init() {
 }
 
 func SubnetMatcher(addr string, n *net.IPNet) bool {
-	ip := net.ParseIP(addr)
-	iplog := log.WithField("ip", addr)
+	log.WithField("addr", addr).Debug("Address received")
+
+	tmp := strings.Split(addr, ":")
+	iplog := log.WithField("ip", tmp[0])
+	ip := net.ParseIP(tmp[0])
 
 	if ip == nil {
 		iplog.Warn("Unable to parse remote requesting ip")
@@ -63,7 +67,6 @@ func SubnetMatcher(addr string, n *net.IPNet) bool {
 	if n.Contains(ip) {
 		return true
 	} else {
-		iplog.Warn("IP is not within allowed range")
 		return false
 	}
 }
@@ -96,8 +99,7 @@ func runAPI() {
 
 	r.PathPrefix("/").MatcherFunc(SubnetMatchAdmin).Handler(http.FileServer(http.Dir("./static/admin/")))
 	r.PathPrefix("/").MatcherFunc(SubnetMatchTeam1).Handler(http.FileServer(http.Dir("./static/team1/")))
-	//	r.PathPrefix("/").MatcherFunc(SubnetMatchTeam2).Handler(http.FileServer(http.Dir("./static/team2/")))
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/team2/")))
+	r.PathPrefix("/").MatcherFunc(SubnetMatchTeam2).Handler(http.FileServer(http.Dir("./static/team2/")))
 
 	http.ListenAndServe(":80", r)
 }
@@ -207,18 +209,23 @@ func apiActionsSet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var target string
+	var teamname string
 	if !act.TargetRand {
 		if SubnetMatcher(r.RemoteAddr, subnetTeam1) {
 			if act.TargetSelf {
 				target = "@red"
+				teamname = "Red"
 			} else {
 				target = "@blue"
+				teamname = "Blue"
 			}
 		} else if SubnetMatcher(r.RemoteAddr, subnetTeam2) {
 			if act.TargetSelf {
 				target = "@blue"
+				teamname = "Blue"
 			} else {
 				target = "@red"
+				teamname = "Red"
 			}
 		} else {
 			w.WriteHeader(HTTP_CODE_BADREQ)
@@ -230,14 +237,18 @@ func apiActionsSet(w http.ResponseWriter, r *http.Request) {
 		if SubnetMatcher(r.RemoteAddr, subnetTeam1) {
 			if act.TargetSelf {
 				target, _ = T.GetRandomUser("Red")
+				teamname = "Blue"
 			} else {
 				target, _ = T.GetRandomUser("Blue")
+				teamname = "Red"
 			}
 		} else if SubnetMatcher(r.RemoteAddr, subnetTeam2) {
 			if act.TargetSelf {
 				target, _ = T.GetRandomUser("Blue")
+				teamname = "Blue"
 			} else {
 				target, _ = T.GetRandomUser("Red")
+				teamname = "Red"
 			}
 		} else {
 			w.WriteHeader(HTTP_CODE_BADREQ)
@@ -247,13 +258,47 @@ func apiActionsSet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if SubnetMatcher(r.RemoteAddr, subnetTeam1) {
+		red, ok := T.Get("Red")
+		if ok {
+			l.WithFields(log.Fields{
+				"color": "red",
+				"credits": red.Credits,
+				"cost": act.Cost,
+			}).Info("Team attempted to purchase action")
+			if red.Credits < act.Cost {
+				l.Warn("Team attempted to purchase action they couldn't afford")
+				w.WriteHeader(HTTP_CODE_BADREQ)
+				fmt.Fprintf(w, "You can't afford that!")
+				return
+			}
+		}
+	} else if SubnetMatcher(r.RemoteAddr, subnetTeam2) {
+		blue, ok := T.Get("Blue")
+		if ok {
+			l.WithFields(log.Fields{
+				"color": "blue",
+				"credits": blue.Credits,
+				"cost": act.Cost,
+			}).Info("Team attempted to purchase action")
+			if blue.Credits < act.Cost {
+				l.Warn("Team attempted to purchase action they couldn't afford")
+				w.WriteHeader(HTTP_CODE_BADREQ)
+				fmt.Fprintf(w, "You can't afford that!")
+				return
+			}
+		}
+	}
+
+	T.AddCredit(teamname, act.Cost * -1)
+
 	respChan := make(chan string, 1)
 	cmd := fmt.Sprintf(act.Cmd, target)
 	RconChan <- RconData{cmd, respChan}
 
 	out := <-respChan
 
-	l.WithField("output", out).Info("Ran action for team against target.")
+	l.Info("Ran action for team against target.")
 	w.WriteHeader(HTTP_CODE_OK)
 	fmt.Fprintf(w, out)
 }

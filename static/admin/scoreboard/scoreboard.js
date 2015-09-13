@@ -22,12 +22,14 @@ scoreboard.controller('AdminController', ['$interval', '$scope', 'TeamService', 
 				$scope.red.info.challenges = data.info.challenges
 				$scope.red.info.score = data.info.score
 				$scope.red.info.credits = data.info.credits
+				$scope.red.info.users = data.info.users
 			})
 		TeamService.get({ name: "Blue" },
 			function success(data, headers) {
 				$scope.blue.info.challenges = data.info.challenges
 				$scope.blue.info.score = data.info.score
 				$scope.blue.info.credits = data.info.credits
+				$scope.blue.info.users = data.info.users
 			})
 	}, 1000);
 }]);

@@ -8,14 +8,8 @@ team.factory('ActionService', ['$http', function ($http) {
 	ActionService.query = function() {
 		return $http.get("/api/actions");
 	}
-	ActionService.run = function(name, self) {
-    var target
-    if(self) {
-      target = "Red"
-    } else {
-      target = "Red"
-    }
-		return $http.get("/api/actions/"+name+"/"+target)
+	ActionService.run = function(name) {
+		return $http.get("/api/actions/"+name)
 	}
 	return ActionService;
 }])
@@ -42,7 +36,7 @@ team.controller('TeamController', ['$interval', '$scope', 'ActionService', 'Team
 		});
 
   $scope.purchaseClick = function(action, target) {
-    ActionService.run(action.name, target)
+    ActionService.run(action.name)
       .success(function(data) {
         growl.success(action.name + " purchased successfully.")
         $scope.team.info.credits -= action.cost

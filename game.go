@@ -88,10 +88,7 @@ func RunGameChannel() {
 			}).Info("Processing user join team.")
 
 			if !T.Check(m[1]) {
-				T.Set(m[1], Team{
-					Challenges: make(map[string]bool),
-					Users:      NewUsers(),
-				})
+				T.Set(m[1], NewTeam())
 			}
 			T.AddUser(m[1], l.Username, u)
 			continue

@@ -32,7 +32,7 @@ func parseLogLine(s string) (SteamLog, error) {
 
 	if len(logMatch) > 0 {
 		if !T.Check(logMatch[4]) {
-			T.Set(logMatch[4], Team{Users: NewUsers()})
+			T.Set(logMatch[4], NewTeam())
 		}
 		return SteamLog{
 			Username: logMatch[1],
@@ -56,7 +56,7 @@ func main() {
 	// COMMAND LINE OPTIONS
 	optRconaddr := flag.String("rconserver", "127.0.0.1:27015", "server:port of the RCON server to use")
 	optRconpass := flag.String("rconpassword", "", "Password of the rcon server")
-	optPort := flag.Int("port", 27500, "Port to listen for server logs")
+	optPort := flag.String("loglistener", "127.0.0.1:27500", "Where to listen for server logs")
 	optChallengeFile := flag.String("challenges", "", "JSON file of challenge information.")
 	flag.Parse()
 	rconaddr := *optRconaddr
@@ -87,7 +87,12 @@ func main() {
 	go runAPI()
 
 	// LISTEN FOR UDP
-	conn, err := net.ListenUDP("udp", &net.UDPAddr{Port: *optPort})
+	udp, err := net.ResolveUDPAddr("udp", *optPort)
+	if err != nil {
+		log.Error("Log listener does not appear to be a valid address")
+		return
+	}
+	conn, err := net.ListenUDP("udp", udp)
 	if err != nil {
 		log.Error("Unable to stard up UDP listener" + err.Error())
 		return
